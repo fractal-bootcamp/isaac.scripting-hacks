@@ -4,7 +4,6 @@ echo "This script will help you set up a Vite/React/TypeScript frontend and a ba
 
 # Input for the project directory
 read -p "Enter the name for the new directory: " dirName
-
 if [ -z "$dirName" ]; then
     echo "Directory name cannot be empty. Exiting."
     exit 1
@@ -21,7 +20,6 @@ echo "Setting up frontend with Vite/React/TypeScript..."
 mkdir frontend
 cd frontend
 bun create vite . --template react-ts
-
 if [ $? -ne 0 ]; then
     echo "Error initializing frontend project."
     exit 1
@@ -29,7 +27,6 @@ fi
 
 # Install frontend dependencies
 bun install
-
 if [ $? -ne 0 ]; then
     echo "Error during bun install for frontend."
     exit 1
@@ -41,7 +38,6 @@ cd ..
 mkdir backend
 cd backend
 bun init -y
-
 if [ $? -ne 0 ]; then
     echo "Error initializing backend project."
     exit 1
@@ -49,7 +45,6 @@ fi
 
 # Install backend dependencies (Express, CORS)
 bun add express cors dotenv
-
 if [ $? -ne 0 ]; then
     echo "Error installing backend dependencies."
     exit 1
@@ -81,21 +76,23 @@ EOL
 
 echo "Backend setup complete!"
 
-# Capture current working directory paths for frontend and backend
-frontendDir="$PWD/../frontend"
-backendDir="$PWD"
+# Instructions for the user to run the servers
+echo ""
+echo "Setup is complete!"
 
-# Run the frontend and backend servers in separate terminal tabs on macOS
-echo "Starting both frontend and backend servers..."
+echo ""
+echo "To run the **frontend** development server:"
+echo "1. Navigate to the frontend directory:"
+echo "   cd $dirName/frontend"
+echo "2. Start the development server:"
+echo "   bun dev"
 
-# Start frontend in a new terminal tab
-osascript -e 'tell application "Terminal"
-    do script "cd '$frontendDir' && bun run dev"
-end tell'
+echo ""
+echo "To run the **backend** server:"
+echo "1. Navigate to the backend directory:"
+echo "   cd $dirName/backend"
+echo "2. Start the server:"
+echo "   bun run index.ts"
 
-# Start backend in a new terminal tab
-osascript -e 'tell application "Terminal"
-    do script "cd '$backendDir' && bun run index.ts"
-end tell'
-
-echo "Frontend and backend servers are now running."
+echo ""
+echo "Happy coding!"
