@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "This script will help you set up a Vite/React/TypeScript frontend and a basic Bun/Express backend, as well as an optional database."
+echo "This script will help you set up a Vite/React/TypeScript frontend with Tailwind CSS, optional React Router, and a basic Bun/Express backend, along with an optional database."
 
 # Input for the project directory
 read -p "Enter the name for the new directory: " dirName
@@ -35,9 +35,130 @@ if [ $? -ne 0 ]; then
 fi
 echo ""
 
+# Install Tailwind CSS and its dependencies using Bun
+echo "Installing Tailwind CSS..."
+bun add -d tailwindcss postcss autoprefixer
+if [ $? -ne 0 ]; then
+    echo "Error installing Tailwind CSS."
+    exit 1
+fi
+
+# Initialize Tailwind CSS configuration
+bunx tailwindcss init -p
+if [ $? -ne 0 ]; then
+    echo "Error initializing Tailwind CSS."
+    exit 1
+fi
+
+# Overwrite the Tailwind configuration file with the necessary content paths
+cat > tailwind.config.js <<EOL
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+EOL
+
+# Replace the content of src/index.css with Tailwind directives
+cat > src/index.css <<EOL
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+EOL
+
+echo "Tailwind CSS has been set up successfully."
+echo ""
+
+# Ask if the user wants to install React Router
+# NOTE: Selecting 'No' may give a warning because Tailwind is installed but not being used in the default template
+read -p "Do you want to install React Router? (Y/N): " installReactRouter 
+if [[ "$installReactRouter" =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Installing React Router..."
+    echo ""
+
+    # Install react-router-dom using Bun
+    bun add react-router-dom
+    if [ $? -ne 0 ]; then
+        echo "Error installing React Router."
+        exit 1
+    fi
+
+    # Create src/pages directory
+    mkdir -p src/pages
+
+    # Create src/pages/Home.tsx
+    cat > src/pages/Home.tsx <<EOL
+import React from 'react';
+
+function Home() {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold">Home Page</h2>
+      <p>Welcome to the home page!</p>
+    </div>
+  );
+}
+
+export default Home;
+EOL
+
+    # Create src/pages/About.tsx
+    cat > src/pages/About.tsx <<EOL
+import React from 'react';
+
+function About() {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold">About Page</h2>
+      <p>This is the about page.</p>
+    </div>
+  );
+}
+
+export default About;
+EOL
+
+    # Replace the content of src/App.tsx with a component using Tailwind CSS classes and React Router
+    cat > src/App.tsx <<EOL
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+
+function App() {
+  return (
+    <Router>
+      <nav className="p-4 bg-gray-200">
+        <Link to="/" className="mr-4">Home</Link>
+        <Link to="/about">About</Link>
+      </nav>
+      <div className="p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+EOL
+
+    echo "React Router has been installed and basic pages have been set up."
+    echo ""
+fi
+
+# Back to the main project directory
+cd ..
+echo ""
+
 # Backend setup: Basic Bun project with Express and CORS
 echo "Setting up backend with Bun/Express..."
-cd ..
 mkdir backend
 cd backend
 bun init -y
@@ -83,7 +204,7 @@ app.get('/api', (req, res) => {
     res.json({ message: 'Hello from the API!' });
 });
 
-console.log("Hello from Bun!")
+console.log("Hello from Bun!");
 
 // Start server
 app.listen(PORT, () => {
@@ -181,6 +302,7 @@ echo "   cd $dirName/frontend"
 echo "2. Start the development server:"
 echo "   bun dev"
 echo ""
+
 echo "To run the backend server:"
 echo "1. Navigate to the backend directory:"
 echo "   cd $dirName/backend"
